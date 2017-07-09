@@ -1,9 +1,10 @@
-package main
+package server
 
 import (
 	"fmt"
 	"net"
 	"os"
+
 )
 
 const (
