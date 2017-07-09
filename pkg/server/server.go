@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 
+	"github.com/GoTalk/pkg/dispatcher"
 )
 
 const (
@@ -13,7 +14,7 @@ const (
 	CONN_TYPE = "tcp"
 )
 
-func main() {
+func ListenAndServe() {
 	// Listen for incoming connections.
 	l, err := net.Listen(CONN_TYPE, CONN_HOST+":"+CONN_PORT)
 	if err != nil {
@@ -23,16 +24,13 @@ func main() {
 	// Close the listener when the application closes.
 	defer l.Close()
 	fmt.Println("Listening on " + CONN_HOST + ":" + CONN_PORT)
-	for {
-		// Listen for an incoming connection.
-		conn, err := l.Accept()
-		if err != nil {
-			fmt.Println("Error accepting: ", err.Error())
-			os.Exit(1)
-		}
-		// Handle connections in a new goroutine.
-		go handleRequest(conn)
-	}
+
+	d := &dispatcher.Dispatcher{}
+	d.Start(l)
+}
+
+func main() {
+	ListenAndServe()
 }
 
 // Handles incoming requests.
