@@ -1,6 +1,9 @@
 package pduhandler
 
+
+import "github.com/GoTalk/pkg/dispatcher"
+
+
 type PduHandler interface {
-	HandleReq()
-	HandleResp()
+	HandlePdu(buf []byte, d *dispatcher.Dispatcher)
 }
