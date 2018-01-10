@@ -1,8 +1,8 @@
 package dispatcher
 
 import (
-	"net"
 	"fmt"
+	"net"
 	"os"
 
 	"github.com/GoTalk/pkg/pduhandler"
@@ -11,32 +11,50 @@ import (
 type Dispatcher struct {
 	recvConn []net.Conn
 	sendConn []net.Conn
-	recvSeq int
-	sendSeq int
+	l        net.Listener
+	recvSeq  int
+	sendSeq  int
 }
 
-const READ_BUF_SIZE = 2048
+const (
+	CONN_HOST     = "localhost"
+	CONN_PORT     = "3333"
+	CONN_TYPE     = "tcp"
+	READ_BUF_SIZE = 2048
+)
 
-func (d *Dispatcher) Start(l net.Listener) {
+func (d *Dispatcher) Listen() {
+	// Listen for incoming connections.
+	var err error
+	d.l, err = net.Listen(CONN_TYPE, CONN_HOST+":"+CONN_PORT)
+	if err != nil {
+		fmt.Println("Error listening:", err.Error())
+		os.Exit(1)
+	}
+	// Close the listener when the application closes.
+	fmt.Println("Listening on " + CONN_HOST + ":" + CONN_PORT)
+}
+
+func (d *Dispatcher) Start(p pduhandler.PduHandler) {
+
 	for {
 		// Listen for an incoming connection.
-		conn, err := l.Accept()
+		conn, err := d.l.Accept()
 		if err != nil {
 			fmt.Println("Error accepting: ", err.Error())
 			os.Exit(1)
 		}
 		d.recvConn = append(d.recvConn, conn)
 		// Handle connections in a new goroutine.
-		go d.handleRequest()
+		go d.handleRequest(p)
 	}
 }
 
 // Handles incoming requests.
-func (d *Dispatcher) handleRequest() {
+func (d *Dispatcher) handleRequest(p pduhandler.PduHandler) {
 	// Make a buffer to hold incoming data.
 	recvBuf := make([]byte, READ_BUF_SIZE)
 
-	var p pduhandler.PduHandler
 	for {
 		// Read the incoming connection into the buffer.
 		n, err := d.recvConn[d.recvSeq].Read(recvBuf)
@@ -66,4 +84,3 @@ func (d *Dispatcher) handleResponse() {
 	}
 
 }
-

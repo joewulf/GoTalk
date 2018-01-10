@@ -1,30 +1,19 @@
 package server
 
 import (
-	"fmt"
-	"net"
-	"os"
-
 	"github.com/GoTalk/pkg/dispatcher"
 )
 
-const (
-	CONN_HOST = "localhost"
-	CONN_PORT = "3333"
-	CONN_TYPE = "tcp"
-)
+type MessageServer struct {
+}
 
 func ListenAndServe() {
-	// Listen for incoming connections.
-	l, err := net.Listen(CONN_TYPE, CONN_HOST+":"+CONN_PORT)
-	if err != nil {
-		fmt.Println("Error listening:", err.Error())
-		os.Exit(1)
-	}
-	// Close the listener when the application closes.
-	defer l.Close()
-	fmt.Println("Listening on " + CONN_HOST + ":" + CONN_PORT)
-
+	var m MessageServer
 	d := &dispatcher.Dispatcher{}
-	d.Start(l)
+	d.Listen()
+	d.Start(&m)
+}
+
+func (m *MessageServer) HandlePdu(buf []byte, d *dispatcher.Dispatcher) {
+
 }
